@@ -1,7 +1,22 @@
 <html>
   <head>
+    <script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
   </head>
   <body>
-    Test
+    <script>
+      
+      username = prompt('Please enter a user name: ')
+      while(username.length < 1) {
+        username = prompt("I'm sure you have a name ;)\nDon't be shy, what's your name?")
+      }
+
+      var socket = io()
+      socket.on('connect', function() {
+        socket.emit('howdy', username)
+      })
+      socket.on('new_user', function(user) {
+        console.log('I welcome ' + user.name);
+      })
+    </script>
   </body>
 </html>
