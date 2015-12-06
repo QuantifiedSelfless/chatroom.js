@@ -5,7 +5,9 @@ var Room = function(userLimit) {
 
 Room.prototype.addUser = function(user) {
   if(this.hasRoom()) {
+    user.room = this
     this.users.push(user);
+    this.announceUser(user, 'new_user', {name: user.name})
     return true;
   } else { return false; }
 }
@@ -14,18 +16,23 @@ Room.prototype.removeUser = function(user) {
   var index = this.users.indexOf(user)
   if(index != -1) {
     this.users.splice(index, 1)
+    console.log(user)
+    this.sendToAll(user, 'user_left', {name: user.name})
   }
 }
 
-Room.prototype.announceUser = function(user) {
-  // make sure user is in this room
-  if(this.users.indexOf(user) != -1) {
-    for (i in this.users) {
-      var currentUser = this.users[i]
-      if(currentUser != user) {
-        currentUser.socket.emit('new_user', {name: currentUser.name})
-      }
+Room.prototype.sendToAll = function(sender, channel, message) {
+  for (i in this.users) {
+    var currentUser = this.users[i]
+    if(currentUser != user) {
+      currentUser.socket.emit(channel, message)
     }
+  }
+}
+
+Room.prototype.broadcast = function(message) {
+  for (i in this.users) {
+    this.users[i].emit('broadcast', message)
   }
 }
 

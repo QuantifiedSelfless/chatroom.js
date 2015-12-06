@@ -7,16 +7,16 @@ var Room = require('./room.js');
 var User = require('./user.js');
 
 var rooms = []
-var defaultUserLimit = 5
+var defaultUserLimit = 2
 
 function getFreeRoom() {
     for (i in rooms) {
       var room = rooms[i]
-      if(room.hasRoom) {
+      if(room.hasRoom()) {
         return room;
       }
     }
-    var newRoom = new Room(defaultUserLimit) 
+    var newRoom = new Room(defaultUserLimit)
     rooms.push(newRoom)
     return newRoom
   }
@@ -24,20 +24,27 @@ function getFreeRoom() {
 app.use(express.static(__dirname + "/public"))
 
 io.on('connection', function(socket) {
-  
+
   // assign a room to this user
   var user = new User(socket)
-  
+
   // note: users won't join any room until they identify themselves
   socket.on('howdy', function(username) {
     user.name = username
     var room = getFreeRoom()
     room.addUser(user)
-    room.announceUser(user)
   })
-  
-  // 
-  
+
+  socket.on('message', function(msg) {
+    // process the message here.
+    if(msg)
+    room.sendToAll(user, 'message', {name: user.name, text: msg})
+  })
+
+  socket.on('disconnect', function() {
+    user.leaveRoom()
+  })
+
 })
 
 var port = process.env.PORT || 9393

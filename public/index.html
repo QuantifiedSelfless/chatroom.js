@@ -4,7 +4,7 @@
   </head>
   <body>
     <script>
-      
+
       username = prompt('Please enter a user name: ')
       while(username.length < 1) {
         username = prompt("I'm sure you have a name ;)\nDon't be shy, what's your name?")
@@ -16,6 +16,9 @@
       })
       socket.on('new_user', function(user) {
         console.log('I welcome ' + user.name);
+      })
+      socket.on('user_left', function(user) {
+        console.log(user.name + ' left!');
       })
     </script>
   </body>
