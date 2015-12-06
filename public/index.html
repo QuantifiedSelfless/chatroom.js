@@ -1,9 +1,48 @@
 <html>
   <head>
+    <script type="text/javascript" src="elizabot.js"></script>
+    <script type="text/javascript" src="elizadata.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: #e9be00; border: none; color: #fff; padding: 10px; }
+      #messages { list-style-type: none; margin: 10; padding-bottom: 50px; overflow-y: scroll;}
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+    </style>
   </head>
   <body>
+    <ul id="messages"></ul>
+    <form onsubmit="return false">
+        <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
     <script>
+
+      //Elizabot
+      // var eliza = new ElizaBot();
+      // var private_eliza = new ElizaBot();
+      function elizaStep() {
+      //     var userinput =  $('#m').val();
+      //     if (userinput != '') {
+      //         data = {"function" : "elizachat",
+      //                 "message" : eliza.transform(userinput)
+      //         };
+      //         ws.send(JSON.stringify(data));
+      //     }
+      }
+      function private_elizaStep() {
+      //     var userinput =  $('#m').val();
+      //     if (userinput != '') {
+      //         data = {"function" : "private_elizachat",
+      //                 "message" : private_eliza.transform(userinput)
+      //         };
+      //         ws.send(JSON.stringify(data));
+      //     }
+      }
 
       username = prompt('Please enter a user name: ')
       while(username.length < 1) {
@@ -13,12 +52,43 @@
       var socket = io()
       socket.on('connect', function() {
         socket.emit('howdy', username)
+        $('#messages').append($('<li>').text('User connected'));
       })
+      socket.on('disconnect', function() {
+        $('#messages').append($('<li>').text('User disconnected'));
+      })
+
       socket.on('new_user', function(user) {
-        console.log('I welcome ' + user.name);
+        $('#messages').append($('<li>').text(user.name + ' connected'));
       })
+
+      socket.on('user_left', function(user) {
+        $('#messages').append($('<li>').text(user.name + ' disconnected'));
+      })
+
+      socket.on('message', function(msg) {
+        $('#messages').append($('<li>').html( '<b>'+msg.name+'</b>: ' + msg.text));
+        $('body').scrollTop($('ul li').last().position().top + $('ul li').last().height());
+      })
+
       socket.on('user_left', function(user) {
         console.log(user.name + ' left!');
+      })
+
+      $('form').submit(function() {
+        text = $('#m').val()
+        if (text.search('private') == 0) {
+          data = {type: "private", message : text };
+          socket.emit('message', JSON.stringify(data))
+          private_elizaStep()
+        }
+        else {
+          data = {type : "chat", message : text };
+          socket.emit('message', JSON.stringify(data));
+          elizaStep();
+        }
+        $('#m').val('');
+        return false;
       })
     </script>
   </body>

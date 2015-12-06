@@ -37,8 +37,8 @@ io.on('connection', function(socket) {
 
   socket.on('message', function(msg) {
     // process the message here.
-    if(msg)
-    room.sendToAll(user, 'message', {name: user.name, text: msg})
+    var messageBlob = JSON.parse(msg)
+    user.room.broadcast('message', {name: user.name, text: messageBlob.message})
   })
 
   socket.on('disconnect', function() {
