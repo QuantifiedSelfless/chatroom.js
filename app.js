@@ -38,7 +38,22 @@ io.on('connection', function(socket) {
   socket.on('message', function(msg) {
     // process the message here.
     var messageBlob = JSON.parse(msg)
-    user.room.broadcast('message', {name: user.name, text: messageBlob.message})
+    var sender = user.name
+    console.log(messageBlob)
+    switch (messageBlob.type) {
+      case "private_elizachat":
+        sender = "Elizabot"
+      case "private":
+        user.socket.emit('message', {name: sender + " (Private)", text: messageBlob.message})
+        break;
+
+      case "elizachat":
+        sender = "Elizabot"
+      default:
+        user.room.broadcast('message', {name: sender, text: messageBlob.message})
+        break;
+
+    }
   })
 
   socket.on('disconnect', function() {

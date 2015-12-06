@@ -23,25 +23,21 @@
     <script>
 
       //Elizabot
-      // var eliza = new ElizaBot();
-      // var private_eliza = new ElizaBot();
-      function elizaStep() {
-      //     var userinput =  $('#m').val();
-      //     if (userinput != '') {
-      //         data = {"function" : "elizachat",
-      //                 "message" : eliza.transform(userinput)
-      //         };
-      //         ws.send(JSON.stringify(data));
-      //     }
+      var eliza = new ElizaBot();
+      var private_eliza = new ElizaBot();
+      function elizaStep(socket) {
+          var userinput =  $('#m').val();
+          if (userinput != '') {
+              data = { type : "elizachat", message : eliza.transform(userinput) };
+              socket.emit('message', JSON.stringify(data));
+          }
       }
-      function private_elizaStep() {
-      //     var userinput =  $('#m').val();
-      //     if (userinput != '') {
-      //         data = {"function" : "private_elizachat",
-      //                 "message" : private_eliza.transform(userinput)
-      //         };
-      //         ws.send(JSON.stringify(data));
-      //     }
+      function private_elizaStep(socket) {
+          var userinput =  $('#m').val();
+          if (userinput != '') {
+              data = { type : "private_elizachat", message : private_eliza.transform(userinput) };
+              socket.emit('message', JSON.stringify(data));
+          }
       }
 
       username = prompt('Please enter a user name: ')
@@ -67,25 +63,23 @@
       })
 
       socket.on('message', function(msg) {
-        $('#messages').append($('<li>').html( '<b>'+msg.name+'</b>: ' + msg.text));
+        $('#messages').append($('<li>').html( '<b>' + msg.name + '</b>: ' + msg.text));
         $('body').scrollTop($('ul li').last().position().top + $('ul li').last().height());
-      })
-
-      socket.on('user_left', function(user) {
-        console.log(user.name + ' left!');
       })
 
       $('form').submit(function() {
         text = $('#m').val()
-        if (text.search('private') == 0) {
-          data = {type: "private", message : text };
+        // todo: move regex to a gloal scope to improve performance
+        var matchResults = /^[/]?private:[ ]?(.*)$/.exec(text)
+        if (matchResults != null) {
+          data = {type: "private", message : matchResults[1] };
           socket.emit('message', JSON.stringify(data))
-          private_elizaStep()
+          private_elizaStep(socket)
         }
         else {
           data = {type : "chat", message : text };
           socket.emit('message', JSON.stringify(data));
-          elizaStep();
+          elizaStep(socket);
         }
         $('#m').val('');
         return false;
