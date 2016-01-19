@@ -33,7 +33,7 @@ var elizaPres = [
 "recollect", "remember",
 "recall", "remember",
 "dreamt", "dreamed",
-"dreams", "dream",
+"dreams", "dream", 
 "maybe", "perhaps",
 "certainly", "yes",
 "machine", "computer",

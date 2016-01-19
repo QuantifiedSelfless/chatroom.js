@@ -7,7 +7,7 @@ var Room = require('./room.js');
 var User = require('./user.js');
 
 var rooms = []
-var defaultUserLimit = 2
+var defaultUserLimit = 4
 
 function getFreeRoom() {
     for (i in rooms) {
@@ -33,8 +33,9 @@ io.on('connection', function(socket) {
     user.name = username
     var room = getFreeRoom()
     room.addUser(user)
+    //display all users currently in room
   })
-
+      
   socket.on('message', function(msg) {
     // process the message here.
     var messageBlob = JSON.parse(msg)
@@ -42,13 +43,13 @@ io.on('connection', function(socket) {
     console.log(messageBlob)
     switch (messageBlob.type) {
       case "private_elizachat":
-        sender = "Elizabot"
+        sender = "Amelia"
       case "private":
         user.socket.emit('message', {name: sender + " (Private)", text: messageBlob.message})
         break;
 
       case "elizachat":
-        sender = "Elizabot"
+        sender = "Amelia"
       default:
         user.room.broadcast('message', {name: sender, text: messageBlob.message})
         break;

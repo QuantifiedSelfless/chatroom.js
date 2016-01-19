@@ -1,6 +1,6 @@
 var Room = function(userLimit) {
   this.userLimit = userLimit
-  this.users = []
+  this.users = [] 
 }
 
 Room.prototype.addUser = function(user) {
@@ -8,6 +8,9 @@ Room.prototype.addUser = function(user) {
     user.room = this
     this.users.push(user);
     this.sendToAll(user, 'new_user', {name: user.name})
+    for (i in this.users) {
+       user.socket.emit('get_current_users', {name: this.users[i].name}) 
+    }
     return true;
   } else { return false; }
 }
